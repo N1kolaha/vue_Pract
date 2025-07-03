@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Список дел</title>
+        <link rel="stylesheet" href="main.css">
+
+    </head>
+    <body>
+        <div id="todo-list">
+            <div class="header">
+                <h1>{{ header ? header : 'Добро пожаловать' }}</h1>
+                <button v-if="editing" @click="doEdit(false)" class="btn.btn-cancel">Отмена</button>
+                <button v-else @click="doEdit(true)" class="btn.btn-add">Добавить</button>
+
+            </div>
+
+            <div v-if="editing" class="add-item-form">
+                <input @keyup.enter="saveItem" v-model="newItem" type="text" placeholder="Add in item">
+
+                <p class="counter">{{characterCount}}/200</p>
+    
+               <label>
+                <input type="checkbox" v-model="newItemHighPriority">Важно
+               </label>
+               <button :disabled="newItem.length<5" @click="saveItem" class="btn btn-primary">Сохранить</button>
+
+            </div>
+
+
+            <p v-if="items.length===0">Дел нет</p>
+
+
+                <ul>
+                    <li v-for="item in filteredItems"  :key="item.id"
+                    
+                    ><span @click="removeItem(item)">⨉&nbsp;</span>  <span @click="togglePurchased(item)"  :class="{strikeout:item.purchased, priority: item.highPriority  }"
+                    class="static-class">{{item.label}}</span> </li>
+
+                   
+                </ul>
+        </div>
+        <script src="https://unpkg.com/vue@3"></script>
+        <script>
+        const todoList= Vue.createApp({
+                data(){
+                return{ 
+                    header: "Список дел",
+                    editing:false,
+                    newItem: '',
+                    newItemHighPriority: false,
+                   
+                    items: [
+                      {id: 1, label:"Купить еда", purchased:true, highPriority:false},
+                       {id: 2, label:"Бежать", purchased:true, highPriority:false},
+                        {id: 3, label:"Играть", purchased:false, highPriority:true},
+                         
+                ]
+                } 
+            },
+            computed:{
+                characterCount(){
+                    return this.newItem.length
+                },
+                reversedItems(){
+                    return[...this.items].reverse()
+                },
+                filteredItems(){
+                    return [...this.items].sort((a, b) => {
+                       
+                    return a.purchased - b.purchased
+                        })
+                }
+            
+
+            },
+            methods:{
+                saveItem(){
+                    this.items.push({
+                        id:this.items.length+1,
+                         label:this.newItem,
+                         highPriority: this.newItemHighPriority,
+                         purchased: false
+
+                        })
+
+                    this.newItem = ""
+                    this.newItemHighPriority = ""
+                },
+                doEdit(editing){
+                    this.editing = editing
+                    this.newItem=""
+                    this.newItemHighPriority =""
+                },
+                togglePurchased(item){
+                    item.purchased = !item.purchased
+                },
+                removeItem(item){
+                    this.items = this.items.filter(value => value !== item)
+                }
+            }
+        })
+            .mount('#todo-list')
+           
+        </script>
+    </body>
+</html>
